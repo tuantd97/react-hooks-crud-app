@@ -27,7 +27,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && npm run typecheck"
+      "pre-commit": "npx lint-staged && npm run typecheck"
     }
   },
   "repository": {

@@ -6,9 +6,12 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
+const appDirectory = process.cwd();
+const publicPath = path.resolve(appDirectory, 'public');
+const buildPath = path.resolve(appDirectory, 'build');
 
 module.exports = {
-  entry: path.resolve(__dirname, './src/index.tsx'),
+  entry: path.resolve(process.cwd(), 'src/index.tsx'),
   module: {
     rules: [
       {
@@ -60,17 +63,24 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'public'),
-          to: path.resolve(__dirname, 'build'),
+          from: publicPath,
+          to: buildPath,
         },
       ],
     }),
     new webpack.ProgressPlugin(),
-    isAnalyze && new BundleAnalyzerPlugin({ generateStatsFile: true }),
+    // isAnalyze && new BundleAnalyzerPlugin({ generateStatsFile: true }),
   ],
   resolve: {
-    module: ['src', 'node_modules'],
+    modules: ['src', 'node_modules'],
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   target: 'web',
+  devServer: {
+    contentBase: 'public',
+    port: 3000,
+    hot: true,
+    watchContentBase: true,
+    historyApiFallback: true,
+  },
 };
