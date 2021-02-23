@@ -3,6 +3,9 @@ const { merge } = require('webpack-merge');
 const common = require('./webpack.common');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = merge(common, {
   mode: 'production',
@@ -19,6 +22,7 @@ module.exports = merge(common, {
         use: [
           {
             loader: 'ts-loader',
+            exclude: /node_modules/,
             options: {
               transpileOnly: true, // fork-ts-checker-webpack-plugin is used for type checking
               logLevel: 'info',
@@ -75,21 +79,55 @@ module.exports = merge(common, {
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      template: 'public/index.html',
-      inject: true,
-      minify: {
-        collapseWhitespace: true,
-        removeComments: true,
-        removeRedundantAttributes: true,
-        removeEmptyAttributes: true,
-        removeStyleLinkTypeAttributes: true,
-        useShortDoctype: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-      },
+    new MiniCssExtractPlugin({
+      filename: 'static/css/[name].[contenthash:8].css',
+    }),
+    new CleanWebpackPlugin(),
+    new CompressionPlugin({
+      test: /\.(css|js|html|svg)$/,
     }),
   ],
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin(),
+      new HtmlWebpackPlugin({
+        template: 'public/index.html',
+        inject: true,
+        minify: {
+          collapseWhitespace: true,
+          removeComments: true,
+          removeRedundantAttributes: true,
+          removeEmptyAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          useShortDoctype: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        },
+      }),
+    ],
+    nodeEnv: 'production',
+    concatenateModules: true,
+    runtimeChunk: true,
+    splitChunks: {
+      chunks: 'all',
+      name: false,
+      maxInitialRequests: 10,
+      minSize: 0,
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            const packageName = module.context.match(
+              /[\\/]node_modules[\\/](.*?)([\\/]|$)/,
+            )[1];
+
+            return `${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
 });
