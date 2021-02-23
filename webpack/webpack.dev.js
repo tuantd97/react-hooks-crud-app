@@ -20,6 +20,7 @@ module.exports = merge(common, {
     rules: [
       {
         test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'ts-loader',
@@ -98,4 +99,7 @@ module.exports = merge(common, {
     },
   },
   devtool: 'cheap-module-source-map',
+  performance: {
+    hints: false,
+  },
 });

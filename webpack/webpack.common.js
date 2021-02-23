@@ -1,9 +1,11 @@
 const path = require('path');
-const { webpack } = require('webpack');
+const webpack = require('webpack');
 const isProd = process.env.NODE_ENV === 'production';
-const CompressionPlugin = require('compression-webpack-plugin');
+const isAnalyze = typeof process.env.BUNDLE_ANALYZE !== 'undefined';
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 
 module.exports = {
   entry: path.resolve(__dirname, './src/index.tsx'),
@@ -13,6 +15,30 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
+      },
+      {
+        test: /\.less$/,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader', // translates CSS into CommonJS
+          },
+          {
+            loader: 'less-loader', // compiles Less to CSS
+            options: {
+              lessOptions: {
+                javascriptEnabled: true,
+                paths: [path.resolve(__dirname, 'node_modules')],
+                webpackImporter: false,
+                modifyVars: {
+                  'ant-prefix': 'crud',
+                },
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.html$/,
@@ -27,9 +53,7 @@ module.exports = {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
     }),
-    new CompressionPlugin({
-      test: /\.(css|js|html|svg)$/,
-    }),
+    // Run typescript checker
     new ForkTsCheckerWebpackPlugin({
       async: !isProd,
     }),
@@ -41,9 +65,12 @@ module.exports = {
         },
       ],
     }),
+    new webpack.ProgressPlugin(),
+    isAnalyze && new BundleAnalyzerPlugin({ generateStatsFile: true }),
   ],
   resolve: {
     module: ['src', 'node_modules'],
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
+  target: 'web',
 };
