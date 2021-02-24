@@ -11,7 +11,7 @@ const styledComponentsTransformer = createStyledComponentsTransformer();
 module.exports = merge(common, {
   mode: 'development',
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(process.cwd(), 'build'),
     publicPath: '/',
     filename: '[name].[contenthash:8].js',
     chunkFilename: '[name].[contenthash:8].chunk.js',
@@ -86,7 +86,7 @@ module.exports = merge(common, {
     new ErrorOverlayPlugin(),
     new HtmlWebpackPlugin({
       template: 'public/index.html',
-      inject: true,
+      inject: 'body',
     }),
     new CircularDependencyPlugin({
       exclude: /a\.js|node_modules/, // exclude node_modules

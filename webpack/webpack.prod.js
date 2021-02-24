@@ -10,7 +10,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = merge(common, {
   mode: 'production',
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(process.cwd(), 'build'),
     publicPath: '/',
     filename: 'static/js/[name].[contenthash:8].js',
     chunkFilename: 'static/js/[name].[contenthash:8].chunk.js',
@@ -19,10 +19,10 @@ module.exports = merge(common, {
     rules: [
       {
         test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'ts-loader',
-            exclude: /node_modules/,
             options: {
               transpileOnly: true, // fork-ts-checker-webpack-plugin is used for type checking
               logLevel: 'info',
@@ -93,7 +93,7 @@ module.exports = merge(common, {
       new TerserPlugin(),
       new HtmlWebpackPlugin({
         template: 'public/index.html',
-        inject: true,
+        inject: 'body',
         minify: {
           collapseWhitespace: true,
           removeComments: true,
